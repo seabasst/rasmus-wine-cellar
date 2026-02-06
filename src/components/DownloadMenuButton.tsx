@@ -35,7 +35,7 @@ export default function DownloadMenuButton() {
     <button
       onClick={handleDownload}
       disabled={loading}
-      className="inline-flex items-center gap-2 px-4 py-2 bg-stone-800 text-white rounded-md hover:bg-stone-700 disabled:opacity-50 transition-colors text-sm font-medium"
+      className="group inline-flex items-center gap-2 px-5 py-2.5 bg-wine text-white rounded-lg hover:bg-wine-deep shadow-lg hover:shadow-xl disabled:opacity-50 transition-all duration-300 text-sm font-medium"
     >
       {loading ? (
         <>
@@ -55,12 +55,12 @@ export default function DownloadMenuButton() {
               d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
             />
           </svg>
-          Generating...
+          <span>Generating...</span>
         </>
       ) : (
         <>
           <svg
-            className="h-4 w-4"
+            className="h-4 w-4 transition-transform group-hover:-translate-y-0.5"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -72,7 +72,7 @@ export default function DownloadMenuButton() {
               d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
             />
           </svg>
-          Download PDF
+          <span>Download PDF</span>
         </>
       )}
     </button>

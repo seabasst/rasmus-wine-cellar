@@ -20,6 +20,7 @@ export interface Wine {
   glass_price: number | null
   bottle_price: number | null
   tasting_notes: string | null
+  image_url: string | null
   is_active: boolean
   created_at: string
   updated_at: string

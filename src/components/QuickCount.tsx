@@ -58,9 +58,31 @@ export default function QuickCount({ wines, onUpdateCount }: QuickCountProps) {
     }
   }
 
-  const handleKeyDown = (e: React.KeyboardEvent, wineId: string) => {
+  const handleKeyDown = (e: React.KeyboardEvent, wineId: string, index: number) => {
     if (e.key === 'Enter') {
-      handleInputBlur(wineId)
+      e.preventDefault()
+      // Save current value
+      const newCount = editValue === '' ? 0 : parseInt(editValue)
+      if (!isNaN(newCount) && newCount >= 0) {
+        onUpdateCount(wineId, newCount)
+      }
+      // Focus next input
+      const nextIndex = index + 1
+      if (nextIndex < filteredWines.length) {
+        const nextWine = filteredWines[nextIndex]
+        setEditingId(nextWine.id)
+        setEditValue(nextWine.bottle_count.toString())
+        setTimeout(() => {
+          const nextInput = document.querySelector(`[data-quickcount-index="${nextIndex}"]`) as HTMLInputElement
+          if (nextInput) {
+            nextInput.focus()
+            nextInput.select()
+          }
+        }, 0)
+      } else {
+        setEditingId(null)
+        setEditValue('')
+      }
     }
   }
 
@@ -182,11 +204,12 @@ export default function QuickCount({ wines, onUpdateCount }: QuickCountProps) {
               <input
                 type="text"
                 inputMode="numeric"
+                data-quickcount-index={index}
                 value={editingId === wine.id ? editValue : wine.bottle_count}
                 onFocus={() => handleInputFocus(wine)}
                 onBlur={() => handleInputBlur(wine.id)}
                 onChange={(e) => handleInputChange(e.target.value)}
-                onKeyDown={(e) => handleKeyDown(e, wine.id)}
+                onKeyDown={(e) => handleKeyDown(e, wine.id, index)}
                 className={`w-14 h-10 text-center border-2 rounded-lg text-lg font-semibold transition-colors focus:outline-none focus:border-wine ${
                   wine.bottle_count <= 2
                     ? 'border-wine/50 text-wine bg-wine/5'

@@ -58,9 +58,32 @@ export default function WineList({ wines, onEdit, onUpdateCount, onDelete }: Win
     }
   }
 
-  const handleKeyDown = (e: React.KeyboardEvent, wineId: string) => {
+  const handleKeyDown = (e: React.KeyboardEvent, wineId: string, index: number) => {
     if (e.key === 'Enter') {
-      handleInputBlur(wineId)
+      e.preventDefault()
+      // Save current value
+      const newCount = editValue === '' ? 0 : parseInt(editValue)
+      if (!isNaN(newCount) && newCount >= 0) {
+        onUpdateCount(wineId, newCount)
+      }
+      // Focus next input
+      const nextIndex = index + 1
+      if (nextIndex < filteredWines.length) {
+        const nextWine = filteredWines[nextIndex]
+        setEditingId(nextWine.id)
+        setEditValue(nextWine.bottle_count.toString())
+        // Focus the next input after state update
+        setTimeout(() => {
+          const nextInput = document.querySelector(`[data-wine-index="${nextIndex}"]`) as HTMLInputElement
+          if (nextInput) {
+            nextInput.focus()
+            nextInput.select()
+          }
+        }, 0)
+      } else {
+        setEditingId(null)
+        setEditValue('')
+      }
     }
   }
 
@@ -159,7 +182,7 @@ export default function WineList({ wines, onEdit, onUpdateCount, onDelete }: Win
               </tr>
             </thead>
             <tbody className="divide-y divide-cream-dark">
-              {filteredWines.map((wine) => (
+              {filteredWines.map((wine, index) => (
                 <tr key={wine.id} className={`bg-white hover:bg-cream-dark/30 transition-colors ${!wine.is_active ? 'opacity-60' : ''}`}>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
@@ -191,11 +214,12 @@ export default function WineList({ wines, onEdit, onUpdateCount, onDelete }: Win
                       <input
                         type="text"
                         inputMode="numeric"
+                        data-wine-index={index}
                         value={editingId === wine.id ? editValue : wine.bottle_count}
                         onFocus={() => handleInputFocus(wine)}
                         onBlur={() => handleInputBlur(wine.id)}
                         onChange={(e) => handleInputChange(e.target.value)}
-                        onKeyDown={(e) => handleKeyDown(e, wine.id)}
+                        onKeyDown={(e) => handleKeyDown(e, wine.id, index)}
                         className={`w-12 h-7 text-center border rounded text-sm font-semibold focus:outline-none focus:border-wine ${
                           wine.bottle_count <= 2 ? 'border-wine/50 text-wine bg-wine/5' : 'border-cream-dark text-charcoal'
                         }`}
@@ -388,11 +412,12 @@ export default function WineList({ wines, onEdit, onUpdateCount, onDelete }: Win
                     <input
                       type="text"
                       inputMode="numeric"
+                      data-wine-index={index}
                       value={editingId === wine.id ? editValue : wine.bottle_count}
                       onFocus={() => handleInputFocus(wine)}
                       onBlur={() => handleInputBlur(wine.id)}
                       onChange={(e) => handleInputChange(e.target.value)}
-                      onKeyDown={(e) => handleKeyDown(e, wine.id)}
+                      onKeyDown={(e) => handleKeyDown(e, wine.id, index)}
                       className={`w-10 h-7 text-center border rounded text-sm font-semibold focus:outline-none focus:border-wine ${
                         wine.bottle_count <= 2 ? 'border-wine/50 text-wine bg-wine/5' : 'border-cream-dark text-charcoal'
                       }`}

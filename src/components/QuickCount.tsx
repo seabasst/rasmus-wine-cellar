@@ -23,6 +23,8 @@ export default function QuickCount({ wines, onUpdateCount }: QuickCountProps) {
   const [filter, setFilter] = useState<WineCategory | 'all'>('all')
   const [search, setSearch] = useState('')
   const [showLowStockOnly, setShowLowStockOnly] = useState(false)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [editValue, setEditValue] = useState('')
 
   const filteredWines = wines
     .filter(wine => wine.is_active)
@@ -35,6 +37,33 @@ export default function QuickCount({ wines, onUpdateCount }: QuickCountProps) {
 
   const lowStockCount = wines.filter(w => w.is_active && w.bottle_count <= 2).length
 
+  const handleInputFocus = (wine: Wine) => {
+    setEditingId(wine.id)
+    setEditValue(wine.bottle_count.toString())
+  }
+
+  const handleInputBlur = (wineId: string) => {
+    const newCount = editValue === '' ? 0 : parseInt(editValue)
+    if (!isNaN(newCount) && newCount >= 0) {
+      onUpdateCount(wineId, newCount)
+    }
+    setEditingId(null)
+    setEditValue('')
+  }
+
+  const handleInputChange = (value: string) => {
+    // Allow empty string or valid positive numbers
+    if (value === '' || /^\d+$/.test(value)) {
+      setEditValue(value)
+    }
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent, wineId: string) => {
+    if (e.key === 'Enter') {
+      handleInputBlur(wineId)
+    }
+  }
+
   return (
     <div>
       {/* Header */}
@@ -46,7 +75,7 @@ export default function QuickCount({ wines, onUpdateCount }: QuickCountProps) {
         </div>
         <div>
           <h2 className="text-2xl font-serif text-charcoal">Quick Count</h2>
-          <p className="text-sm text-warm-gray">Fast inventory updates for your cellar</p>
+          <p className="text-sm text-warm-gray">Tap numbers to edit directly</p>
         </div>
       </div>
 
@@ -102,15 +131,15 @@ export default function QuickCount({ wines, onUpdateCount }: QuickCountProps) {
       </p>
 
       {/* Wine List */}
-      <div className="space-y-3">
+      <div className="space-y-2">
         {filteredWines.map((wine, index) => (
           <div
             key={wine.id}
-            className="flex items-center gap-4 p-4 bg-white rounded-xl border border-cream-dark hover:border-wine/20 hover:shadow-md transition-all duration-200 animate-fade-in"
-            style={{ animationDelay: `${index * 0.03}s` }}
+            className="flex items-center gap-3 p-3 bg-white rounded-xl border border-cream-dark hover:border-wine/20 transition-all duration-200 animate-fade-in"
+            style={{ animationDelay: `${index * 0.02}s` }}
           >
             {/* Wine Image Thumbnail */}
-            <div className="relative w-14 h-20 rounded-lg overflow-hidden bg-cream-dark shrink-0">
+            <div className="relative w-10 h-14 rounded-lg overflow-hidden bg-cream-dark shrink-0">
               {wine.image_url ? (
                 <Image
                   src={wine.image_url}
@@ -121,7 +150,7 @@ export default function QuickCount({ wines, onUpdateCount }: QuickCountProps) {
                 />
               ) : (
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <svg className="w-6 h-6 text-warm-gray/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 text-warm-gray/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
                 </div>
@@ -130,33 +159,35 @@ export default function QuickCount({ wines, onUpdateCount }: QuickCountProps) {
 
             {/* Wine Info */}
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-1">
-                <span className={`badge ${categoryBadgeClass[wine.category]} text-[10px] px-2 py-0.5`}>
+              <div className="flex items-center gap-2">
+                <span className={`badge ${categoryBadgeClass[wine.category]} text-[9px] px-1.5 py-0.5`}>
                   {CATEGORY_LABELS[wine.category]}
                 </span>
                 {wine.vintage && (
                   <span className="text-xs text-warm-gray">{wine.vintage}</span>
                 )}
               </div>
-              <h3 className="font-serif text-lg text-charcoal truncate">{wine.name}</h3>
-              <p className="text-sm text-warm-gray truncate">{wine.producer}</p>
+              <h3 className="font-medium text-charcoal truncate text-sm">{wine.name}</h3>
+              <p className="text-xs text-warm-gray truncate">{wine.producer}</p>
             </div>
 
-            {/* Stock Counter - Large Touch-Friendly Buttons */}
-            <div className="flex items-center gap-2">
+            {/* Stock Counter - Simplified */}
+            <div className="flex items-center gap-1">
               <button
                 onClick={() => onUpdateCount(wine.id, Math.max(0, wine.bottle_count - 1))}
-                className="w-12 h-12 flex items-center justify-center rounded-xl bg-cream-dark hover:bg-wine hover:text-white text-charcoal text-2xl font-light transition-all duration-200 active:scale-95"
-                title="Remove one bottle"
+                className="w-10 h-10 flex items-center justify-center rounded-lg bg-cream-dark hover:bg-wine hover:text-white text-charcoal text-xl transition-all duration-150 active:scale-95"
               >
                 −
               </button>
               <input
-                type="number"
-                min="0"
-                value={wine.bottle_count}
-                onChange={(e) => onUpdateCount(wine.id, parseInt(e.target.value) || 0)}
-                className={`w-16 h-12 text-center border-2 rounded-xl text-xl font-serif font-semibold transition-colors focus:outline-none focus:border-wine ${
+                type="text"
+                inputMode="numeric"
+                value={editingId === wine.id ? editValue : wine.bottle_count}
+                onFocus={() => handleInputFocus(wine)}
+                onBlur={() => handleInputBlur(wine.id)}
+                onChange={(e) => handleInputChange(e.target.value)}
+                onKeyDown={(e) => handleKeyDown(e, wine.id)}
+                className={`w-14 h-10 text-center border-2 rounded-lg text-lg font-semibold transition-colors focus:outline-none focus:border-wine ${
                   wine.bottle_count <= 2
                     ? 'border-wine/50 text-wine bg-wine/5'
                     : 'border-cream-dark text-charcoal bg-white'
@@ -164,8 +195,7 @@ export default function QuickCount({ wines, onUpdateCount }: QuickCountProps) {
               />
               <button
                 onClick={() => onUpdateCount(wine.id, wine.bottle_count + 1)}
-                className="w-12 h-12 flex items-center justify-center rounded-xl bg-wine/10 hover:bg-wine hover:text-white text-wine text-2xl font-light transition-all duration-200 active:scale-95"
-                title="Add one bottle"
+                className="w-10 h-10 flex items-center justify-center rounded-lg bg-wine/10 hover:bg-wine hover:text-white text-wine text-xl transition-all duration-150 active:scale-95"
               >
                 +
               </button>
@@ -185,18 +215,11 @@ export default function QuickCount({ wines, onUpdateCount }: QuickCountProps) {
           <h3 className="text-lg font-serif text-charcoal mb-2">No wines found</h3>
           <p className="text-warm-gray text-sm">
             {showLowStockOnly
-              ? 'No wines are low on stock. Great job keeping inventory!'
+              ? 'No wines are low on stock.'
               : 'Try adjusting your search or filters.'}
           </p>
         </div>
       )}
-
-      {/* Keyboard Shortcuts Help */}
-      <div className="mt-8 p-4 bg-cream-dark/30 rounded-xl">
-        <p className="text-xs text-warm-gray text-center">
-          Tip: Click directly on the count to type a new value, or use the +/- buttons for quick adjustments
-        </p>
-      </div>
     </div>
   )
 }

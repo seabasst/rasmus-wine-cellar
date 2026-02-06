@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import Image from 'next/image'
 import { Wine, WineCategory, CATEGORY_LABELS } from '@/types/wine'
 
@@ -12,6 +12,19 @@ interface WineFormProps {
 
 export default function WineForm({ wine, onSubmit, onCancel }: WineFormProps) {
   const [loading, setLoading] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const handleImageCapture = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    const reader = new FileReader()
+    reader.onloadend = () => {
+      const base64 = reader.result as string
+      setFormData(prev => ({ ...prev, image_url: base64 }))
+    }
+    reader.readAsDataURL(file)
+  }
   const [formData, setFormData] = useState({
     name: wine?.name ?? '',
     producer: wine?.producer ?? '',
@@ -75,34 +88,64 @@ export default function WineForm({ wine, onSubmit, onCancel }: WineFormProps) {
         <div className="lg:col-span-1">
           <div className="sticky top-6">
             <label className="label">Wine Label Image</label>
-            <div className="relative aspect-[3/4] rounded-xl overflow-hidden bg-cream-dark border-2 border-dashed border-warm-gray/30 hover:border-wine/50 transition-colors">
+            {/* Hidden file input for camera capture */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              onChange={handleImageCapture}
+              className="hidden"
+            />
+            {/* Clickable image area */}
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="relative w-full aspect-[3/4] rounded-xl overflow-hidden bg-cream-dark border-2 border-dashed border-warm-gray/30 hover:border-wine/50 active:border-wine transition-colors cursor-pointer"
+            >
               {formData.image_url ? (
-                <Image
-                  src={formData.image_url}
-                  alt="Wine label preview"
-                  fill
-                  className="object-cover"
-                  unoptimized
-                />
+                <>
+                  <Image
+                    src={formData.image_url}
+                    alt="Wine label preview"
+                    fill
+                    className="object-cover"
+                    unoptimized
+                  />
+                  <div className="absolute inset-0 bg-black/0 hover:bg-black/20 transition-colors flex items-center justify-center">
+                    <span className="opacity-0 hover:opacity-100 text-white text-sm font-medium bg-black/50 px-3 py-1.5 rounded-lg">
+                      Tap to change
+                    </span>
+                  </div>
+                </>
               ) : (
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-warm-gray p-6">
                   <svg className="w-12 h-12 mb-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
-                  <span className="text-sm text-center">Add a wine label image</span>
+                  <span className="text-sm text-center font-medium">Tap to take photo</span>
+                  <span className="text-xs text-center mt-1 opacity-70">or paste URL below</span>
                 </div>
               )}
-            </div>
+            </button>
+            {/* URL input as alternative */}
             <input
               type="url"
-              value={formData.image_url}
+              value={formData.image_url.startsWith('data:') ? '' : formData.image_url}
               onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
               className="input mt-3"
-              placeholder="Paste image URL..."
+              placeholder="Or paste image URL..."
             />
-            <p className="text-xs text-warm-gray mt-2">
-              Tip: Use an image URL from the web or upload to a service like Imgur
-            </p>
+            {formData.image_url && (
+              <button
+                type="button"
+                onClick={() => setFormData({ ...formData, image_url: '' })}
+                className="text-xs text-wine hover:text-wine-deep mt-2"
+              >
+                Remove image
+              </button>
+            )}
           </div>
         </div>
 

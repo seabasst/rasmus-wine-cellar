@@ -26,7 +26,7 @@ type ViewMode = 'cards' | 'table'
 export default function WineList({ wines, onEdit, onUpdateCount, onDelete }: WineListProps) {
   const [filter, setFilter] = useState<WineCategory | 'all'>('all')
   const [showInactive, setShowInactive] = useState(false)
-  const [viewMode, setViewMode] = useState<ViewMode>('cards')
+  const [viewMode, setViewMode] = useState<ViewMode>('table')
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editValue, setEditValue] = useState('')
 

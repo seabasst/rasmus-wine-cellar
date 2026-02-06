@@ -109,7 +109,7 @@ export default function Home() {
           <div className="flex items-center justify-between">
             <div className="animate-fade-in">
               <h1 className="text-4xl font-serif font-light text-white tracking-wide">
-                Wine Cellar
+                Rasmus Wine Cellar
               </h1>
               <p className="text-wine-rose/80 text-sm mt-1 tracking-widest uppercase">
                 Inventory Management
@@ -297,7 +297,7 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="mt-auto py-6 text-center text-warm-gray text-sm">
-        <p>Wine Cellar &mdash; Crafted for Sommeliers</p>
+        <p>Rasmus Wine Cellar</p>
       </footer>
     </div>
   )

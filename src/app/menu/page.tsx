@@ -196,7 +196,7 @@ export default async function MenuPage() {
             </p>
             <div className="mt-6 pt-6 border-t border-warm-gray/20">
               <p className="text-xs text-warm-gray/50 tracking-widest uppercase">
-                Wine Cellar
+                Rasmus Wine Cellar
               </p>
             </div>
           </div>

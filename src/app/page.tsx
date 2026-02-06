@@ -6,6 +6,7 @@ import { Wine } from '@/types/wine'
 import WineList from '@/components/WineList'
 import WineForm from '@/components/WineForm'
 import QuickCount from '@/components/QuickCount'
+import ExportButton from '@/components/ExportButton'
 
 type View = 'list' | 'quick-count' | 'add' | 'edit'
 
@@ -197,7 +198,7 @@ export default function Home() {
         </div>
 
         {/* Navigation Tabs */}
-        <div className="flex flex-wrap gap-2 mb-6 animate-fade-in">
+        <div className="flex flex-wrap items-center gap-2 mb-6 animate-fade-in">
           <button
             onClick={() => { setView('list'); setEditingWine(null) }}
             className={`px-5 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 ${
@@ -243,6 +244,9 @@ export default function Home() {
               Add Wine
             </span>
           </button>
+          <div className="ml-auto">
+            <ExportButton wines={wines} />
+          </div>
         </div>
 
         {/* Content */}

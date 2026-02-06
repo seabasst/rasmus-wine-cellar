@@ -1,4 +1,7 @@
-import { Wine, WineCategory } from '@/types/wine'
+import { Wine } from '@/types/wine'
+
+// Error type matching Supabase's PostgrestError
+type MockError = { message: string; details: string; hint: string; code: string } | null
 
 // Sample wines for local testing
 const sampleWines: Wine[] = [
@@ -213,7 +216,7 @@ class MockQueryBuilder {
   }
 
   async then<T>(
-    resolve: (result: { data: Wine[] | null; error: null }) => T
+    resolve: (result: { data: Wine[] | null; error: MockError }) => T
   ): Promise<T> {
     await delay()
     let result = [...this._data]
@@ -248,7 +251,7 @@ class MockInsertBuilder {
   }
 
   async then<T>(
-    resolve: (result: { data: Wine[] | null; error: null }) => T
+    resolve: (result: { data: Wine[] | null; error: MockError }) => T
   ): Promise<T> {
     await delay()
     const newWines: Wine[] = this._data.map((w) => ({
@@ -287,7 +290,7 @@ class MockUpdateBuilder {
   }
 
   async then<T>(
-    resolve: (result: { data: Wine[] | null; error: null }) => T
+    resolve: (result: { data: Wine[] | null; error: MockError }) => T
   ): Promise<T> {
     await delay()
     const updated: Wine[] = []
@@ -313,7 +316,7 @@ class MockDeleteBuilder {
   }
 
   async then<T>(
-    resolve: (result: { data: Wine[] | null; error: null }) => T
+    resolve: (result: { data: Wine[] | null; error: MockError }) => T
   ): Promise<T> {
     await delay()
     const deleted: Wine[] = []
